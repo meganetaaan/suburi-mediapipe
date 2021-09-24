@@ -1,0 +1,30 @@
+version: "3"
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - ./backend:/code
+      - backend-node-modules:/code/node_modules
+      - shared:/code/static
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+      target: dev
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/code
+      - frontend-node-modules:/code/node_modules
+      - shared:/code/build
+volumes:
+  frontend-node-modules:
+    driver: 'local'
+  backend-node-modules:
+    driver: 'local'
+  shared:
+    driver: 'local'

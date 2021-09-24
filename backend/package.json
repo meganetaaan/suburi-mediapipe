@@ -1,0 +1,16 @@
+{
+  "name": "suburi-mediapipe-backend",
+  "version": "0.1.0",
+  "description": "My personal project for trying mediapipe",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shinya Ishikawa",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.2.0"
+  }
+}
