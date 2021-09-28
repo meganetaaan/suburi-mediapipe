@@ -1,5 +1,5 @@
 import { Camera } from "@mediapipe/camera_utils";
-import { Holistic, Results } from "@mediapipe/holistic";
+import { FACEMESH_LIPS, Holistic, Results } from "@mediapipe/holistic";
 import { Ref, useCallback, useState } from "react";
 
 export default function useMediaPipe(): [
@@ -8,6 +8,7 @@ export default function useMediaPipe(): [
 ] {
   const [results, setResults] = useState<Results | null>(null);
   const ref = useCallback(async (videoElement: HTMLVideoElement | null) => {
+    console.log(FACEMESH_LIPS)
     if (videoElement == null) {
       return;
     }
@@ -18,7 +19,8 @@ export default function useMediaPipe(): [
     videoElement.srcObject = stream;
     const holistic = new Holistic({
       locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.4/${file}`;
+        // return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.4/${file}`;
+        return `/holistic/${file}`;
       },
     });
     holistic.setOptions({
@@ -29,7 +31,6 @@ export default function useMediaPipe(): [
       minTrackingConfidence: 0.5,
     });
     holistic.onResults((results) => {
-      console.log(results);
       setResults(results);
     });
     const camera = new Camera(videoElement, {
