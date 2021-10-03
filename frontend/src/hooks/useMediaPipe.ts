@@ -2,7 +2,7 @@ import { Camera } from "@mediapipe/camera_utils";
 import { FACEMESH_LIPS, Holistic, Results } from "@mediapipe/holistic";
 import { Ref, useCallback, useState } from "react";
 
-export default function useMediaPipe(): [
+export default function useMediaPipe(filePath?: string): [
   Ref<HTMLVideoElement>,
   Results | null
 ] {
@@ -19,8 +19,8 @@ export default function useMediaPipe(): [
     videoElement.srcObject = stream;
     const holistic = new Holistic({
       locateFile: (file) => {
+        return `${window.location.href}/holistic/${file}`;
         // return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic@0.4/${file}`;
-        return `/holistic/${file}`;
       },
     });
     holistic.setOptions({
