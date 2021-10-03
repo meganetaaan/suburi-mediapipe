@@ -1,19 +1,35 @@
-const express = require('express');
-const app = express();
-const http = require('http');
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server);
+const Express = require('express')
+const app = Express()
+require('express-ws')(app)
 
-app.use('/static', express.static('public'))
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
+const PORT = 8080
+let sockets = []
 
-io.on('connection', (socket) => {
-  console.log('a user connected');
-});
+// publicディレクトリ配下を配信する
+app.use(Express.static('static'))
 
-server.listen(8080, () => {
-  console.log('listening on *:8080');
-});
+// WebSocketエンドポイントの設定
+app.ws('/', function (socket) {
+  console.log('connected')
+  sockets.push(socket)
+
+  socket.on('message', function (message) {
+    console.log('message received: ' + JSON.stringify(message))
+    // 他のコネクションにメッセージを送る
+    sockets.forEach(s => {
+      s.send(message)
+    })
+  })
+
+  socket.on('close', () => {
+    console.log('closed')
+    // 閉じたコネクションを取り除く
+    sockets = sockets.filter(s => {
+      return s !== socket
+    })
+  })
+})
+// ポート8080で接続を待ち受ける
+app.listen(PORT, function () {
+  console.log(`listening on port ${PORT}`)
+})
