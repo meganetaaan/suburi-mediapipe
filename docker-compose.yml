@@ -5,7 +5,7 @@ services:
       context: ./backend
       dockerfile: ./Dockerfile
     ports:
-      - 8080:8080
+      - 10080:8080
     volumes:
       - ./backend:/code
       - backend-node-modules:/code/node_modules

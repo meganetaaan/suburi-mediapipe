@@ -123,7 +123,7 @@ export function drawStackchan(
   }
 }
 
-export function calculateRobotState(results: Results) {
+export function calculateRobotState(results: Results): RobotState {
 
   const faceTop = results.faceLandmarks[10];
   const faceBottom = results.faceLandmarks[152];
