@@ -18,7 +18,8 @@ function currentDataToRobotState(currentData, yawOffset = YAW_OFFSET) {
     rightEyeOpen: eyeOpen,
     pitch: robotPitch,
     yaw: robotYaw,
-    emotion: "NEUTRAL"
+    emotion: "NEUTRAL",
+    hooray: currentData.hooray
   }
 }
 
