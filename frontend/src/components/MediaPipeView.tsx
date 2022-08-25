@@ -1,5 +1,6 @@
 import { FACEMESH_LIPS } from "@mediapipe/holistic";
 import { FC, useCallback, useEffect, useState } from "react";
+import useBLERobotService from "../hooks/useBLERobotService";
 import useMediaPipe from "../hooks/useMediaPipe";
 import useRobotService, { RobotState } from "../hooks/useRobotService";
 import { calculateRobotState, drawMesh, drawStackchan } from "../utils";
@@ -15,12 +16,20 @@ const INITIAL_STATE: RobotState = Object.freeze({
   emotion: "NEUTRAL",
 });
 
+const CONNECTION_METHOD = {
+  WIFI: 0,
+  BLUETOOTH: 1
+}
+
 const MediaPipeView: FC<MediaPipeProps> = () => {
   const [ref, results] = useMediaPipe(process.env.REACT_APP_HOLISTIC_ROOT);
   const [connect, sendState, disconnect, isConnected] = useRobotService();
+  const [connectBLE, sendStateBLE, disconnectBLE, isConnectedBLE] = useBLERobotService();
+  const [connectionMethod, setConnectionMethod] = useState<number>(CONNECTION_METHOD.WIFI)
   const [url, setUrl] = useState(INITIAL_WS_URL);
   const [isDebugging, setDebugging] = useState(false);
   const [pointIdx, setPointIdx] = useState<number>(0);
+  const [drawEnabled, setDrawEnabled] = useState(true);
   const handleCanvasDoubleClick = () => {
     setDebugging(!isDebugging);
   };
@@ -29,14 +38,16 @@ const MediaPipeView: FC<MediaPipeProps> = () => {
       ? calculateRobotState(results)
       : INITIAL_STATE;
   useEffect(() => {
-    sendState(state);
+    connectionMethod === CONNECTION_METHOD.BLUETOOTH ? sendStateBLE(state) : sendState(state);
   }, [results]);
+  const handleConnectionMethodChange = useCallback((event) => {
+    setConnectionMethod(Number(event.target.value));
+  }, [])
   const canvasRef = useCallback(
     (canvas: HTMLCanvasElement | null) => {
-      if (canvas == null) {
+      if (canvas == null || !drawEnabled) {
         return;
       }
-
       const ctx = canvas.getContext("2d");
       if (ctx == null) {
         /* canvas is not ready*/
@@ -58,6 +69,15 @@ const MediaPipeView: FC<MediaPipeProps> = () => {
     },
     [results]
   );
+  const handleConnectClick = () => {
+    if (isConnectedBLE) {
+      disconnectBLE();
+    } else if (isConnected) {
+      disconnect();
+    } else {
+      connectionMethod === CONNECTION_METHOD.BLUETOOTH ? connectBLE() : connect({ url })
+    }
+  }
   return (
     <div>
       <video style={{ display: "none" }} ref={ref} width="640" height="480" />
@@ -71,25 +91,39 @@ const MediaPipeView: FC<MediaPipeProps> = () => {
         height="480"
       />
       <div className="form">
-        <input
-          type="string"
-          value={url}
-          disabled={isConnected}
-          onChange={(ev) => {
-            setUrl(ev.target.value);
-          }}
-        />
+        <label>
+          Connection Method:
+          <select value={connectionMethod} onChange={handleConnectionMethodChange}>
+            <option value={CONNECTION_METHOD.WIFI}>WebSocket</option>
+            <option value={CONNECTION_METHOD.BLUETOOTH}>Bluetooth</option>
+          </select>
+        </label>
+        {
+          connectionMethod === CONNECTION_METHOD.WIFI && (
+            <>
+              <input
+                type="string"
+                value={url}
+                disabled={isConnectedBLE}
+                onChange={(ev) => {
+                  setUrl(ev.target.value);
+                }}
+              />
+            </>
+          )
+        }
         <input
           type="button"
-          value={isConnected ? "disconnect" : "connect"}
-          onClick={() => {
-            if (isConnected) {
-              disconnect();
-            } else {
-              connect({ url });
-            }
-          }}
+          value={(isConnectedBLE || isConnected) ? "disconnect" : "connect"}
+          onClick={handleConnectClick}
         />
+        <input
+          type="checkbox"
+          checked={drawEnabled}
+          onClick={() => {
+            setDrawEnabled(!drawEnabled)
+          }}
+        ></input>
       </div>
       <div>mouthOpen: {state.mouthOpen.toFixed(4)}</div>
       <div style={{ color: "red" }}>

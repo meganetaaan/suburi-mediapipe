@@ -7,6 +7,7 @@ export interface RobotState {
   pitch: number;
   yaw: number;
   emotion: string;
+  hooray?: boolean;
 }
 
 interface RobotServiceReturnType {

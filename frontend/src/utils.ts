@@ -123,7 +123,7 @@ export function drawStackchan(
   }
 }
 
-export function calculateRobotState(results: Results) {
+export function calculateRobotState(results: Results): RobotState {
 
   const faceTop = results.faceLandmarks[10];
   const faceBottom = results.faceLandmarks[152];
@@ -165,6 +165,15 @@ export function calculateRobotState(results: Results) {
     ? "HAPPY"
     : "NEUTRAL";
 
+  const rightHandY = results.rightHandLandmarks?.[0].y ?? null
+  const leftHandY = results.leftHandLandmarks?.[0].y ?? null
+  let hooray
+  if (rightHandY == null || leftHandY == null) {
+    hooray = false
+  } else {
+    const centerY = (rightHandY + leftHandY) / 2
+    hooray = centerY < faceTop.y
+  }
   return {
     leftEyeOpen,
     rightEyeOpen,
@@ -172,6 +181,7 @@ export function calculateRobotState(results: Results) {
     yaw: y,
     pitch: p,
     emotion,
+    hooray,
   }
 }
 
